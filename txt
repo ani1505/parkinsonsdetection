@@ -1,0 +1,5 @@
+@app.route('/')
+def index():
+    with open('frontend/index.html', 'r') as file:
+        html_content = file.read()
+    return html_content
