@@ -48,12 +48,16 @@ class User(db.Model):
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
+    if os.environ.get('VERCEL'):
+        return jsonify({'error': 'Video uploads are disabled until durable storage and inference are configured.'}), 503
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'})
     file = request.files['file']
     if file.filename == '':
         return jsonify({'error': 'No selected file'})
     if file:
+        if Path(file.filename).suffix.lower() not in {'.mp4', '.mov', '.avi', '.mkv', '.webm'}:
+            return jsonify({'error': 'Unsupported video format'}), 400
         filename = secure_filename(file.filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(file_path)
@@ -66,7 +70,11 @@ def predict():
     payload = request.get_json(silent=True) or {}
     video_file = payload.get('filename')
     if not video_file:
-        return jsonify({'error': 'No filename provided'})
+        return jsonify({'error': 'No filename provided'}), 400
+    if Path(video_file).name != video_file:
+        return jsonify({'error': 'Invalid filename'}), 400
+    if svm_model is None:
+        return jsonify({'error': 'No validated model loaded; inference is disabled.'}), 503
     
     video_path = os.path.join(app.config['UPLOAD_FOLDER'], video_file)
     
@@ -74,6 +82,8 @@ def predict():
         return jsonify({'error': 'Uploaded video is unavailable. Serverless files are not shared between requests.'}), 404
     # Preprocess the video and extract features
     frames = preprocess_video(video_path)
+    if len(frames) < 2:
+        return jsonify({'error': 'Video contains too few usable frames'}), 422
     max_length = 1000  # Set the maximum length for feature vectors
     features = extract_optical_flow(frames, max_length)
     
@@ -95,8 +105,9 @@ def welcome():
     return render_template('welcome.html')
 
 @app.route('/register', methods=['GET', 'POST'])
-@app.route('/register', methods=['GET', 'POST'])
 def register():
+    if os.environ.get('VERCEL'):
+        return jsonify({'error': 'Registration requires a persistent database and is not enabled on this preview.'}), 503
     if request.method == 'POST':
         # handle request
         name = request.form['name']
@@ -107,14 +118,20 @@ def register():
             return render_template('welcome.html', error='All fields are required')
 
         new_user = User(name=name, email=email, password=password)
-        db.session.add(new_user)
-        db.session.commit()
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            return render_template('welcome.html', error='Account already exists'), 409
         return redirect('/welcome')
 
     return render_template('welcome.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if os.environ.get('VERCEL'):
+        return jsonify({'error': 'Login requires a persistent database and is not enabled on this preview.'}), 503
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
@@ -134,9 +151,12 @@ def login():
 
 @app.route('/index')
 def dashboard():
+    if os.environ.get('VERCEL'):
+        return render_template('index.html', user=None)
     if 'email' in session:
         user = User.query.filter_by(email=session['email']).first()
-        return render_template('index.html', user=user)
+        if user:
+            return render_template('index.html', user=user)
 
     return redirect('/login')
 
@@ -145,10 +165,9 @@ def logout():
     session.pop('email', None)
     return redirect('/welcome')
 
-with app.app_context():
-    db.create_all()
-
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     # Load dataset and train SVM model
     X_train, y_train = [], []  # Initialize empty lists for features and labels
 
