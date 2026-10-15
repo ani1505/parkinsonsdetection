@@ -1,23 +1,28 @@
 from flask import Flask, request, jsonify, render_template, redirect, session
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import IntegrityError
 import os
 import numpy as np
 from werkzeug.utils import secure_filename
 import bcrypt
+from pathlib import Path
 
-from preprocessing import preprocess_video
-from feature_extraction import extract_optical_flow
-from svm_model import train_svm_model, predict_svm_model
+from backend.preprocessing import preprocess_video
+from backend.feature_extraction import extract_optical_flow
+from backend.svm_model import train_svm_model, predict_svm_model
 
 app = Flask(__name__, instance_relative_config=True, static_folder='frontend/static', template_folder='frontend/templates')
 
 # Configuration from config.py
-app.config['SECRET_KEY'] = 'your_secret_key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'local-development-only-change-me')
+app.config['MAX_CONTENT_LENGTH'] = 25 * 1024 * 1024
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///database.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', '/tmp/parkinsons-uploads' if os.environ.get('VERCEL') else 'uploads')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 DATASET_FOLDER = 'dataset'
@@ -58,12 +63,15 @@ def upload_file():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    video_file = request.json.get('filename')
+    payload = request.get_json(silent=True) or {}
+    video_file = payload.get('filename')
     if not video_file:
         return jsonify({'error': 'No filename provided'})
     
     video_path = os.path.join(app.config['UPLOAD_FOLDER'], video_file)
     
+    if not os.path.isfile(video_path):
+        return jsonify({'error': 'Uploaded video is unavailable. Serverless files are not shared between requests.'}), 404
     # Preprocess the video and extract features
     frames = preprocess_video(video_path)
     max_length = 1000  # Set the maximum length for feature vectors
@@ -136,6 +144,9 @@ def dashboard():
 def logout():
     session.pop('email', None)
     return redirect('/welcome')
+
+with app.app_context():
+    db.create_all()
 
 if __name__ == '__main__':
     # Load dataset and train SVM model
