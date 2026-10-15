@@ -8,6 +8,10 @@ def preprocess_video(video_path, frame_rate=1):
     prev_frame = None
     prev_frame_time = 0
 
+    # Create the frames folder if it doesn't exist
+    frames_folder = os.path.join('dataset', 'frames')
+    if not os.path.exists(frames_folder):
+        os.makedirs(frames_folder)
 
     while cap.isOpened():
         ret, frame = cap.read()
@@ -25,6 +29,9 @@ def preprocess_video(video_path, frame_rate=1):
             
             # Check if the frame is significantly different from the previous frame
             if prev_frame is None or cv2.norm(frame_resized, prev_frame, cv2.NORM_L2) > 1000.0:
+                # Save frame as an image file in the frames folder
+                frame_path = os.path.join(frames_folder, f'{os.path.splitext(os.path.basename(video_path))[0]}_frame_{int(current_frame_time * 1000)}.jpg')
+                cv2.imwrite(frame_path, frame_resized)
                 
                 # Add frame to the list
                 frames.append(frame_resized)

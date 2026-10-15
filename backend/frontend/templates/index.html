@@ -1,54 +1,464 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Explore video-based motion features with a privacy-first Parkinson's gait research demonstration. Educational, non-diagnostic.">
-<title>GaitLab | Video Motion Research Demo</title>
-<style>
-:root{color-scheme:dark;--bg:#081018;--panel:#121f2b;--line:#293847;--ink:#edf7f7;--muted:#9fb3bd;--accent:#5fedd4;--warm:#ffd98a}*{box-sizing:border-box}
-body{margin:0;background:radial-gradient(ellipse at 85% 5%,#163c41 0,transparent 35%),var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}a{color:var(--accent)}button{font:inherit;cursor:pointer}
-header{max-width:1150px;margin:auto;padding:24px 22px;display:flex;align-items:center;justify-content:space-between;gap:10px}header strong{font-size:23px;letter-spacing:-.8px}header strong span{color:var(--accent)}nav a{padding:8px;text-decoration:none;color:var(--muted)}nav a:hover{color:white}
-main{max-width:1150px;margin:auto;padding:38px 22px 80px}.hero{max-width:820px;padding:35px 0 34px}.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:2px;font-size:12px;font-weight:700}
-h1{font-size:clamp(40px,7vw,75px);line-height:1.06;letter-spacing:-3px;margin:18px 0}h1 em{color:var(--accent);font-style:normal}.hero p{font-size:19px;color:var(--muted);max-width:690px}
-.notice{border:1px solid #7f6835;background:#302a19;border-radius:14px;padding:17px 20px;color:#ffe7ac;margin:24px 0 34px}
-.grid{display:grid;grid-template-columns:1.3fr .7fr;gap:20px}.panel{background:linear-gradient(155deg,#162633,#0d1925);border:1px solid var(--line);border-radius:22px;padding:26px;min-width:0}
-h2{font-size:24px;margin:0 0 7px}h3{font-size:18px;margin:15px 0 6px}p{margin-top:6px}.muted{color:var(--muted)}.drop{border:2px dashed #466579;border-radius:17px;padding:35px 18px;display:grid;justify-items:center;text-align:center;gap:12px;background:#132837;margin:22px 0}
-.drop.drag{border-color:var(--accent);background:#1c4242}.btn{background:var(--accent);color:#06252b;border:0;border-radius:10px;padding:11px 20px;font-weight:750}.btn:disabled{opacity:.5;cursor:not-allowed}.btn.secondary{background:#233849;color:var(--ink)}input[type=file]{position:absolute;opacity:0;width:1px;height:1px}
-video{display:none;width:100%;max-height:390px;border-radius:13px;background:black;margin:14px 0}video.visible{display:block}.metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px}.metric{border:1px solid var(--line);border-radius:13px;padding:14px;background:#0b1822}.metric strong{display:block;font-size:30px;color:var(--accent)}.metric small{color:var(--muted)}
-.status{min-height:30px;color:var(--muted);margin:14px 0}.foot{margin-top:50px;color:var(--muted);border-top:1px solid var(--line);padding-top:24px;font-size:14px}.flow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.pill{display:inline-block;border-radius:30px;background:#21453e;color:#8cf8df;padding:4px 11px;font-size:12px;font-weight:bold}
-ul{padding-left:22px;color:var(--muted)}li{margin:8px 0}.small{font-size:13px}#plot{width:100%;height:135px;display:block;margin-top:14px;background:#0d1b25;border-radius:10px}#results[hidden]{display:none}
-@media(max-width:760px){.grid{grid-template-columns:1fr}header{padding:18px}header nav{display:none}.panel{padding:20px}h1{letter-spacing:-2px}.hero{padding-top:12px}.metrics{grid-template-columns:1fr 1fr}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parkinson's Disease Detection</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #e5ddd5;
+            color: #000000;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+            .card {
+
+                border: none;
+            }
+        
+            .card-body {
+                border-radius: 10px;
+                padding:10px;
+            }
+
+        
+        .navbar {
+            background-color: #128C7E;
+            color: #ffffff;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin: 0;
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar h1 {
+            font-family: Arial, sans-serif;
+            font-size: 20px;
+            margin: 0;
+        }
+
+        .navbar-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-links a {
+            color: #ffffff;
+            text-decoration: none;
+            margin-left: 20px;
+            transition: color 0.3s ease;
+        }
+
+        .navbar-links a:hover {
+            color: #f7f7f7;
+        }
+
+        .container {
+            margin: 140px auto 20px;
+            padding: 80px;
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        h2, p {
+            color: #128C7E;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: #128C7E;
+            border: none;
+            color: #ffffff;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            border-radius: 5px;
+        }
+
+        .btn-primary:hover {
+            background-color: #0e7654;
+        }
+
+        #videoContainer {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #uploadedVideo {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: #f0f0f0;
+        }
+
+        #predictionResult {
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #f7f7f7; /* Light background */
+            color: #075e54; /* WhatsApp green text color */
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1000;
+            max-width: 80%;
+            width: 300px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 3px solid #075e54; /* Green border */
+        }
+
+        #predictionResult .card-title {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        #predictionResult .card-text {
+            font-size: 16px;
+        }
+
+        #predictionResult #closePrediction {
+            background-color: #075e54; /* Green button background */
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            margin-top: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #predictionResult #closePrediction:hover {
+            background-color: #064d40; /* Hover color */
+        }
+
+        .scroll-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #128C7E;
+            color: #ffffff;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            text-align: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .scroll-to-top:hover {
+            background-color: #0e7654;
+        }
+        #about {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #aboutVideoContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+        
+        #aboutVideo {
+            width: 100%; /* Set the video width to 100% */
+            height: 100%; /* Set the video height to 100% */
+            object-fit: cover; /* Ensure the video covers the entire container */
+        }
+        #blog {
+            background-image: url('/static/h2.jpg'); /* Specify the background image URL */
+            background-size: cover; /* Cover the entire section */
+            background-position: center; /* Center the background image */
+        }
+        
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .container, .scroll-to-top {
+            animation: fadeInUp 0.8s ease forwards;
+        }
+    </style>
 </head>
 <body>
-<header><strong>Gait<span>Lab</span><small style="font-size:12px;color:#9fb3bd;margin-left:10px">Research demo</small></strong><nav><a href="#analyze">Analyze video</a><a href="#method">How it works</a><a href="#limitations">Limitations</a></nav></header>
-<main>
-<section class="hero"><div class="eyebrow">Computer vision · Video motion analysis</div><h1>See movement.<br><em>Explore the data.</em></h1><p>Experiment with simple frame-to-frame motion measurements using your own walking video. Processing happens in your browser — the video is never uploaded to our servers.</p><div class="flow"><span class="pill">Browser-only processing</span><span class="pill">No account needed</span><span class="pill">Open-source experiment</span></div></section>
-<div class="notice"><strong>Important:</strong> This is an educational visualization, not a Parkinson's disease test. Motion scores do not establish whether someone has Parkinson's. Do not use results for medical decisions.</div>
-<section id="analyze" class="grid"><div class="panel"><h2>Analyze a walking video</h2><p class="muted">Choose a video from your device. For best results, use a short clip (5–30 seconds) with a fixed camera and the full body visible.</p>
-<div class="drop" id="drop"><span style="font-size:34px" aria-hidden="true">▣</span><strong>Drop a video here or browse your files</strong><span class="muted small">MP4, WebM, MOV or other formats supported by your browser • up to 100 MB</span>
-<label for="file" class="btn" style="cursor:pointer">Choose video</label><input id="file" type="file" accept="video/*"></div>
-<div id="selected" class="muted small"></div><video id="video" controls playsinline muted preload="metadata"></video>
-<div class="flow" style="margin-top:15px"><button id="start" class="btn" disabled>Analyze motion</button><button id="reset" class="btn secondary" type="button">Clear video</button></div><div role="status" aria-live="polite" id="status" class="status">Select a video to begin.</div>
-<div id="results" hidden><h3>Motion summary <span class="pill">Exploratory only</span></h3><div class="metrics"><div class="metric"><strong id="samples">—</strong><small>Frame comparisons</small></div><div class="metric"><strong id="average">—</strong><small>Average pixel change (%)</small></div><div class="metric"><strong id="peak">—</strong><small>Peak pixel change (%)</small></div><div class="metric"><strong id="duration">—</strong><small>Clip length (s)</small></div></div><canvas id="plot" width="680" height="135" aria-label="Timeline of relative visual changes"></canvas><p class="muted small">These values indicate image changes, including background or camera movement. They are not clinical gait measurements.</p><button id="csv" class="btn secondary">Export measurements (CSV)</button></div>
+
+<nav class="navbar">
+    <h1>Parkinson's Disease Detection</h1>
+    <div class="navbar-links">
+        <a href="#self-assessment" class="navbar-link">Self Assessment</a>
+        <a href="#about" class="navbar-link">About</a>
+        <a href="#blog" class="navbar-link">Blog</a>
+        <a href="#research" class="navbar-link">Research Paper</a>
+        <a href="/logout" class="btn-primary">Logout</a>
+    </div>
+</nav>
+
+<div class="container" id="self-assessment">
+    <h2>Self Assessment</h2>
+    <p>Welcome to our website! We utilize advanced technology to detect Parkinson's disease by analyzing the walking pattern video uploaded by the user. Simply upload your video, and our system will provide insights into the presence of Parkinson's disease.</p>
+
+    <form id="uploadForm" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="fileInput" class="form-label">Choose a Video File</label>
+            <input type="file" class="form-control" id="fileInput" accept="video/*" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Upload Video</button>
+    </form>
+    
+    <div id="videoContainer">
+        <video id="uploadedVideo" controls autoplay></video>
+
+    </div>
+    
+    <div id="predictionResult">
+        <!-- Placeholder for prediction result -->
+    </div>
 </div>
-<aside class="panel" id="method"><h2>How it works</h2><p class="muted">A lightweight, transparent experiment with no prediction claims.</p><ol><li>Decode a video locally using the browser.</li><li>Sample frames on a small grayscale canvas.</li><li>Calculate the mean absolute change between adjacent frames.</li><li>Plot motion intensity over time and export the readings.</li></ol><h3>Privacy</h3><p class="muted">Video files stay on this device and are not sent to the app backend. Clearing or closing the page discards measurements.</p><h3 id="limitations">Limitations</h3><ul><li>Camera motion and lighting changes affect results.</li><li>Movement score is not gait speed, cadence, or symptom severity.</li><li>There is no validated classifier and no patient-level diagnosis.</li><li>Videos unsupported by your browser cannot be processed.</li></ul><p class="small muted">For a clinical concern, contact a qualified health professional.</p></aside>
-</section><div class="foot">GaitLab · Parkinson's gait research prototype · <a href="https://github.com/ani1505/parkinsonsdetection" target="_blank" rel="noopener noreferrer">View source on GitHub</a></div>
-</main>
+
+<div class="container" id="about">
+    <h2 style="color:white;"><b>About</b></h2>
+    <div>
+        <div>
+            <p style="color:white;">Parkinson's Disease Detection is an innovative platform that aims to assist in the early detection of Parkinson's disease through gait analysis. Our system utilizes advanced machine learning algorithms to analyze uploaded videos of users' walking patterns.</p>
+            <p style="color:white;">We are dedicated to providing a user-friendly and efficient tool for individuals and healthcare professionals to assess the risk of Parkinson's disease at an early stage, allowing for timely intervention and management.</p>
+            <p style="color:white;">Our platform is designed to empower individuals to take control of their health by providing them with accessible and reliable information about Parkinson's disease. By leveraging cutting-edge technology, we strive to bridge the gap between healthcare and technology, ultimately improving the lives of those affected by Parkinson's disease.</p>
+        </div>
+        <div class="col-md-6">
+            <!-- Video container -->
+            <div id="aboutVideoContainer">
+                <video id="aboutVideo" autoplay muted loop>
+                    <source src="/static/about.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Blog section with card carousel -->
+<div class="container" id="blog">
+    <h2 style="color:black;"><b>Blog</b></h2>
+    <div id="blogCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <img src="/static/1.jpg" class="card-img-top" alt="Blog Image 1">
+                            <div class="card-body">
+                                <h5 class="card-title">Understanding Parkinson's Disease (National Insitute on Aging), Home</h5>
+                                <p class="card-text">Parkinson’s disease is a brain disorder that causes unintended or uncontrollable movements, such as shaking, stiffness, and difficulty with balance and...</p>
+                                <a href="https://www.nia.nih.gov/health/parkinsons-disease/parkinsons-disease-causes-symptoms-and-treatments" class="btn btn-primary stretched-link">Read More</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <img src="/static/2.jpg" class="card-img-top" alt="Blog Image 2">
+                            <div class="card-body">
+                                <h5 class="card-title">Gait Analysis in Parkinson’s Disease: An Overview of the Most Accurate Markers for Diagnosis</h5>
+                                <p class="card-text">Gait analysis plays a crucial role in the early diagnosis of Parkinson's disease...</p>
+                                <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7349580/" class="btn btn-primary stretched-link">Read More</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <img src="/static/3.jpg" class="card-img-top" alt="Blog Image 3">
+                            <div class="card-body">
+                                <h5 class="card-title">The Parkinson’s Stories That Inspired Us </h5>
+                                <p class="card-text">Whether diagnosed at 31 or 72, tremor or no tremor, fast or slow progression, feeling relief or anger at hearing the words “You have Parkinson’s,” every Parkinson’s disease (PD) story is different....</p>
+                                <a href="https://www.parkinson.org/blog/awareness/inspiring-stories-2021" class="btn btn-primary stretched-link">Read More</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <img src="/static/4.jpg" class="card-img-top" alt="Blog Image 4">
+                            <div class="card-body">
+                                <h5 class="card-title">Aerobic Exercise Positively Alters Parkinson’s Brain</h5>
+                                <p class="card-text">Getting regular exercise is essential to managing Parkinson’s disease (PD). It is well established that ....</p>
+                                <a href="https://www.parkinson.org/blog/science-news/aerobic-exercise" class="btn btn-primary stretched-link">Read More</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#blogCarousel" data-bs-slide="prev" style=" width: 75px; height: 75px; border: none;">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#blogCarousel" data-bs-slide="next" style=" width: 75px; height: 75px; border: none;">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+        
+    </div>
+</div>
+
+
+
+
+<div class="container" id="research">
+    <h2>Research Papers</h2>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body" style="border:solid 3px #075e54;">
+                    <h5 class="card-title">Survey Paper</h5>
+                    <p class="card-text">"Explore our survey paper PDF for insights into Parkinson's disease detection using gait analysis. Download now for comprehensive research."</p>
+                    <a href="/static/survey_paper.pdf" download class="btn btn-primary stretched-link">Download Survey Paper</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body" style="border:solid 3px #075e54;">
+                    <h5 class="card-title">Implementation Paper</h5>
+                    <p class="card-text">"Discover our implementation paper PDF detailing Parkinson's disease detection through gait analysis. Download now for practical insights and applications."</p>
+                    <a href="/static/implementation_paper.pdf" download class="btn btn-primary stretched-link">Download Implementation Paper</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body" style="border:solid 3px #075e54;">
+                    <h5 class="card-title">Project Report</h5>
+                    <p class="card-text">"Access our project report PDF for an in-depth look at Parkinson's disease detection using gait analysis. Download for comprehensive findings of the project."</p>
+                    <a href="/static/project_report.pdf" download class="btn btn-primary stretched-link">Download Project Report</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<div id="floatingPrediction" class="card text-black" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000;">
+    <div class="card-body" style="background-color: #88AB8E;padding:50px 100px;border:solid 10px #075e54 ;/* WhatsApp green background */">
+        <h5 class="card-title"><b>Prediction Result</b></h5>
+        <p class="card-text" id="predictionText" style="color: #075e54;font-weight:bold;font-size:20px"></p>
+        <button id="closePrediction" class="btn btn-primary">Close</button>
+    </div>
+</div>
+
+
+<button class="scroll-to-top" onclick="scrollToTop()">&uarr;</button>
+
+<!-- Bootstrap Bundle with Popper.js -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-(()=>{'use strict';
-const by=id=>document.getElementById(id);const file=by('file'),drop=by('drop'),v=by('video'),start=by('start'),stat=by('status'),res=by('results');let blobUrl='',points=[],busy=false;
-function msg(t){stat.textContent=t}
-function clear(){if(blobUrl){URL.revokeObjectURL(blobUrl);blobUrl=''}v.pause();v.removeAttribute('src');v.load();v.classList.remove('visible');file.value='';points=[];res.hidden=true;start.disabled=true;by('selected').textContent='';msg('Select a video to begin.')}
-function load(f){clear();if(!f)return;if(!f.type.startsWith('video/')&&!/\.(mp4|webm|mov|m4v|ogg|avi)$/i.test(f.name)){msg('Please select a video.');return}if(f.size>100*1024*1024){msg('Choose a video smaller than 100 MB.');return}blobUrl=URL.createObjectURL(f);v.src=blobUrl;v.classList.add('visible');by('selected').textContent=f.name+' · '+(f.size/1024/1024).toFixed(1)+' MB';msg('Loading video…')}
-file.addEventListener('change',()=>load(file.files[0]));v.addEventListener('loadedmetadata',()=>{if(!Number.isFinite(v.duration)||v.duration<=0){msg('Unable to determine video length.');return}start.disabled=false;msg('Ready — select Analyze motion.')});v.addEventListener('error',()=>{start.disabled=true;msg('This video cannot be decoded in your browser. Try MP4 (H.264) or WebM.')});
-drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('drag')});drop.addEventListener('dragleave',()=>drop.classList.remove('drag'));drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('drag');load(e.dataTransfer.files[0])});by('reset').addEventListener('click',clear);
-const canvas=document.createElement('canvas');canvas.width=96;canvas.height=54;const c=canvas.getContext('2d',{willReadFrequently:true});
-function gray(){c.drawImage(v,0,0,96,54);const a=c.getImageData(0,0,96,54).data,b=new Uint8Array(96*54);for(let j=0,i=0;i<b.length;i++,j+=4)b[i]=(a[j]*3+a[j+1]*6+a[j+2])/10;return b}
-function seek(time){return new Promise((resolve,reject)=>{const timeout=setTimeout(()=>{cleanup();reject(new Error('Timed out seeking video.'))},5000);const done=()=>{cleanup();resolve()};const cleanup=()=>{clearTimeout(timeout);v.removeEventListener('seeked',done)};v.addEventListener('seeked',done,{once:true});v.currentTime=Math.min(time,Math.max(0,v.duration-.02))})}
-function draw(){const cv=by('plot'),ctx=cv.getContext('2d'),w=cv.width,h=cv.height;ctx.clearRect(0,0,w,h);ctx.strokeStyle='#2c4552';ctx.beginPath();ctx.moveTo(0,h-15);ctx.lineTo(w,h-15);ctx.stroke();if(!points.length)return;const max=Math.max(...points.map(p=>p.value),1);ctx.strokeStyle='#5fedd4';ctx.lineWidth=3;ctx.beginPath();points.forEach((p,i)=>{const x=i/(Math.max(points.length-1,1))*(w-20)+10,y=h-20-(p.value/max)*(h-35);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)});ctx.stroke()}
-start.addEventListener('click',async()=>{if(busy||!blobUrl||!Number.isFinite(v.duration))return;busy=true;start.disabled=true;res.hidden=true;points=[];v.pause();try{const count=Math.min(90,Math.max(3,Math.floor(v.duration*3)));let previous=null;for(let i=0;i<count;i++){await seek((i+.25)*v.duration/count);const curr=gray();if(previous){let sum=0;for(let j=0;j<curr.length;j++)sum+=Math.abs(curr[j]-previous[j]);points.push({time:v.currentTime,value:sum/curr.length/255*100})}previous=curr;if(i%5===0)msg('Analyzing frames: '+Math.round(i/count*100)+'%')}if(!points.length)throw new Error('Not enough frames to compare.');const values=points.map(p=>p.value);by('samples').textContent=points.length;by('average').textContent=(values.reduce((a,b)=>a+b,0)/values.length).toFixed(2);by('peak').textContent=Math.max(...values).toFixed(2);by('duration').textContent=v.duration.toFixed(1);draw();res.hidden=false;msg('Completed. Results stay on your device.')}catch(err){msg('Could not analyze video: '+err.message)}finally{busy=false;start.disabled=!blobUrl}});
-by('csv').addEventListener('click',()=>{if(!points.length)return;const csv='time_seconds,mean_pixel_change_percent\n'+points.map(p=>p.time.toFixed(3)+','+p.value.toFixed(4)).join('\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));const a=document.createElement('a');a.href=url;a.download='gaitlab-motion.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)});
-window.addEventListener('beforeunload',()=>{if(blobUrl)URL.revokeObjectURL(blobUrl)});
-})();
-</script></body></html>
+    document.querySelectorAll('.navbar-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = e.target.getAttribute('href').substring(1);
+            const targetSection = document.getElementById(targetId);
+            targetSection.scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+    document.getElementById('uploadForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var formData = new FormData();
+        var fileInput = document.getElementById('fileInput');
+        var uploadedVideo = document.getElementById('uploadedVideo');
+        var predictionResult = document.getElementById('predictionResult');
+        formData.append('file', fileInput.files[0]);
+
+        fetch('/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            uploadedVideo.src = URL.createObjectURL(fileInput.files[0]);
+            uploadedVideo.style.display = 'block'; // Show the video
+            predictionResult.innerHTML = ''; // Clear any previous prediction
+            if (data.filename) {
+                fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ filename: data.filename })
+                })
+                .then(response => response.json())
+                .then(prediction => {
+                    const predictionText = 'Prediction: ' + prediction.prediction;
+                    predictionResult.innerHTML = predictionText;
+                    // Show floating prediction card
+                    document.getElementById('predictionText').textContent = predictionText;
+                    document.getElementById('floatingPrediction').style.display = 'block';
+                })
+                .catch(error => console.error('Error:', error));
+            } else {
+                console.error('Error uploading:', data.error);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+    document.getElementById('closePrediction').addEventListener('click', function() {
+        // Close the floating prediction card
+        document.getElementById('floatingPrediction').style.display = 'none';
+    });
+
+    document.getElementById('reviewForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const userReview = document.getElementById('userReview').value;
+        // Here you can send the userReview to your backend or handle it as needed
+        alert('Review Submitted: ' + userReview);
+        // For demo purposes, just showing an alert
+        document.getElementById('userReview').value = ''; // Clearing the textarea after submission
+    });
+
+    function scrollToTop() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+</script>
+
+</body>
+</html>

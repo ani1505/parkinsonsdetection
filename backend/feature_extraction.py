@@ -3,8 +3,6 @@ import cv2
 import numpy as np
 
 def extract_optical_flow(video_frames, max_length):
-    if len(video_frames) < 2:
-        return np.zeros(max_length, dtype=np.float32)
     prev_frame = video_frames[0]
     flow_vectors = []
 
@@ -21,7 +19,7 @@ def extract_optical_flow(video_frames, max_length):
         prev_frame = frame
 
     # Concatenate flow vectors into a single feature vector
-    features = np.concatenate([vector.ravel() for vector in flow_vectors])
+    features = np.concatenate(flow_vectors)
 
     # Pad or truncate features to ensure consistent length
     if len(features) < max_length:
