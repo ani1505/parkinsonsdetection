@@ -115,6 +115,14 @@
   </style>
 </head>
 <body>
+{% if preview_mode %}
+<div role="status" style="background:#fff3cd;color:#663c00;padding:18px;text-align:center;font:16px/1.5 Arial,sans-serif;position:relative;z-index:1005;margin-top:65px">
+<strong>Research prototype preview — not for medical diagnosis.</strong> The visual interface is available, but registration, video uploads, and AI predictions are not enabled on this hosted preview. Please do not upload patient videos.
+<a href="/index" style="margin-left:14px;color:#084c65;text-decoration:underline;font-weight:bold">Explore project dashboard</a>
+</div>
+<script>document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('form[action="/register"],form[action="/login"]').forEach(function(f){f.addEventListener('submit',function(e){e.preventDefault();alert('Account registration and login are not available in this research preview. Use Explore project dashboard instead.');});});});</script>
+{% endif %}
+
 
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
