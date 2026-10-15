@@ -2,14 +2,10 @@ from flask import Flask, request, jsonify, render_template, redirect, session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 import os
-import numpy as np
 from werkzeug.utils import secure_filename
 import bcrypt
 from pathlib import Path
 
-from backend.preprocessing import preprocess_video
-from backend.feature_extraction import extract_optical_flow
-from backend.svm_model import train_svm_model, predict_svm_model
 
 app = Flask(__name__, instance_relative_config=True, static_folder='frontend/static', template_folder='frontend/templates')
 
@@ -80,6 +76,10 @@ def predict():
     
     if not os.path.isfile(video_path):
         return jsonify({'error': 'Uploaded video is unavailable. Serverless files are not shared between requests.'}), 404
+    import numpy as np
+    from backend.preprocessing import preprocess_video
+    from backend.feature_extraction import extract_optical_flow
+    from backend.svm_model import predict_svm_model
     # Preprocess the video and extract features
     frames = preprocess_video(video_path)
     if len(frames) < 2:
@@ -166,6 +166,10 @@ def logout():
     return redirect('/welcome')
 
 if __name__ == '__main__':
+    from backend.preprocessing import preprocess_video
+    from backend.feature_extraction import extract_optical_flow
+    from backend.svm_model import train_svm_model
+    import numpy as np
     with app.app_context():
         db.create_all()
     # Load dataset and train SVM model
