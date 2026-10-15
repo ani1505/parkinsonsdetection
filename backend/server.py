@@ -17,6 +17,11 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+@app.context_processor
+def preview_context():
+    return {'preview_mode': bool(os.environ.get('VERCEL'))}
+
+
 UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', '/tmp/parkinsons-uploads' if os.environ.get('VERCEL') else 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
