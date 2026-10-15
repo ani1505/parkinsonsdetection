@@ -16,15 +16,15 @@ app = Flask(__name__, instance_relative_config=True, static_folder='frontend/sta
 # Configuration from config.py
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'local-only-change-this-key')
 app.config['MAX_CONTENT_LENGTH'] = 25 * 1024 * 1024
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///database.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:////tmp/parkinsonsdetection.db' if os.getenv('RENDER') else 'sqlite:///database.db')
 
 db = SQLAlchemy(app)
 
-UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'uploads')
+UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', '/tmp/parkinsons-uploads' if os.getenv('RENDER') else 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-DATASET_FOLDER = 'dataset'
+DATASET_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'dataset')
 PARKINSONS_FOLDER = 'parkinsons_videos'
 NON_PARKINSONS_FOLDER = 'non_parkinsons_videos'
 
@@ -190,4 +190,4 @@ if __name__ == '__main__':
     # Train SVM model
     svm_model = train_svm_model(X_train, y_train)
     
-    app.run(debug=False)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', '10000')), debug=False)
