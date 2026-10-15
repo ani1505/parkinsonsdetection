@@ -1,5 +1,6 @@
-flask
-numpy
-opencv-python
-scikit-learn
-imbalanced-learn
+flask>=3.0,<4
+flask-sqlalchemy>=3.1,<4
+bcrypt>=4,<6
+numpy>=1.26,<3
+opencv-python-headless>=4.8,<5
+scikit-learn>=1.4,<2

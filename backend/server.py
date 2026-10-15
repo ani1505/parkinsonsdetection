@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify, render_template, redirect, session
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import IntegrityError
 import os
 import numpy as np
 from werkzeug.utils import secure_filename
 import bcrypt
+from pathlib import Path
 
 from preprocessing import preprocess_video
 from feature_extraction import extract_optical_flow
@@ -12,15 +14,17 @@ from svm_model import train_svm_model, predict_svm_model
 app = Flask(__name__, instance_relative_config=True, static_folder='frontend/static', template_folder='frontend/templates')
 
 # Configuration from config.py
-app.config['SECRET_KEY'] = 'your_secret_key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'local-only-change-this-key')
+app.config['MAX_CONTENT_LENGTH'] = 25 * 1024 * 1024
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:////tmp/parkinsonsdetection.db' if os.getenv('RENDER') else 'sqlite:///database.db')
 
 db = SQLAlchemy(app)
 
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', '/tmp/parkinsons-uploads' if os.getenv('RENDER') else 'uploads')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-DATASET_FOLDER = 'dataset'
+DATASET_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'dataset')
 PARKINSONS_FOLDER = 'parkinsons_videos'
 NON_PARKINSONS_FOLDER = 'non_parkinsons_videos'
 
@@ -49,6 +53,8 @@ def upload_file():
     if file.filename == '':
         return jsonify({'error': 'No selected file'})
     if file:
+        if Path(file.filename).suffix.lower() not in {'.mp4', '.mov', '.webm', '.avi', '.mkv'}:
+            return jsonify({'error': 'Unsupported video file type'}), 400
         filename = secure_filename(file.filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(file_path)
@@ -58,14 +64,22 @@ def upload_file():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    video_file = request.json.get('filename')
+    video_file = (request.get_json(silent=True) or {}).get('filename')
     if not video_file:
-        return jsonify({'error': 'No filename provided'})
+        return jsonify({'error': 'No filename provided'}), 400
+    if video_file != os.path.basename(video_file):
+        return jsonify({'error': 'Invalid filename'}), 400
+    if svm_model is None:
+        return jsonify({'error': 'Model not loaded. Start the server using python backend/server.py'}), 503
     
     video_path = os.path.join(app.config['UPLOAD_FOLDER'], video_file)
     
+    if not os.path.isfile(video_path):
+        return jsonify({'error': 'Video file does not exist'}), 404
     # Preprocess the video and extract features
     frames = preprocess_video(video_path)
+    if len(frames) < 2:
+        return jsonify({'error': 'Video has too few sampled frames'}), 422
     max_length = 1000  # Set the maximum length for feature vectors
     features = extract_optical_flow(frames, max_length)
     
@@ -87,7 +101,6 @@ def welcome():
     return render_template('welcome.html')
 
 @app.route('/register', methods=['GET', 'POST'])
-@app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         # handle request
@@ -99,8 +112,12 @@ def register():
             return render_template('welcome.html', error='All fields are required')
 
         new_user = User(name=name, email=email, password=password)
-        db.session.add(new_user)
-        db.session.commit()
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            return render_template('welcome.html', error='Email already registered'), 409
         return redirect('/welcome')
 
     return render_template('welcome.html')
@@ -128,7 +145,8 @@ def login():
 def dashboard():
     if 'email' in session:
         user = User.query.filter_by(email=session['email']).first()
-        return render_template('index.html', user=user)
+        if user:
+            return render_template('index.html', user=user)
 
     return redirect('/login')
 
@@ -138,6 +156,8 @@ def logout():
     return redirect('/welcome')
 
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     # Load dataset and train SVM model
     X_train, y_train = [], []  # Initialize empty lists for features and labels
 
@@ -170,4 +190,4 @@ if __name__ == '__main__':
     # Train SVM model
     svm_model = train_svm_model(X_train, y_train)
     
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', '10000')), debug=False)
