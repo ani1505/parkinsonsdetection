@@ -214,6 +214,13 @@
     </style>
 </head>
 <body>
+{% if preview_mode %}
+<div role="status" style="background:#fff3cd;color:#663c00;padding:16px;text-align:center;font:16px/1.5 Arial,sans-serif;position:relative;z-index:1100;margin-top:70px">
+<strong>Research-only preview:</strong> This page showcases the gait analysis interface. Uploads and predictions are currently unavailable because a clinically validated model and secure video storage have not been deployed. Do not rely on this project for diagnosis.
+</div>
+<script>document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('#uploadForm input, #uploadForm button').forEach(function(e){e.disabled=true;});var f=document.querySelector('#uploadForm');if(f){f.addEventListener('submit',function(e){e.preventDefault();});}});</script>
+{% endif %}
+
 
 <nav class="navbar">
     <h1>Parkinson's Disease Detection</h1>
